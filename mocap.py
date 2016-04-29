@@ -37,7 +37,7 @@ def DetectMotion(filename):
         nz=cv2.countNonZero(diff)
         if nz>12000:
             cv2.imwrite('{0}\\images\\{1}-{2:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame), img)
-            #cv2.imwrite('c:\\video\\out\\'+datetime.now().strftime('%Y%m%d_%Hh%Mm%Ss%f') + '-d' + nz.__str__() + '.jpg', diff)
+            #cv2.imwrite('{0}\\images\\{1}-{2:06d}-{3:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame,nz), diff)
         frame+=1
             
     cam.release()
