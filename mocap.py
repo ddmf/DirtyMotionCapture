@@ -3,7 +3,12 @@ import cv2
 import ntpath
 import os
 
-CONST_ROOTPATH = "c:\\video\\"
+CONST_ROOTPATH = "c:\\video\\"  #folder list
+CONST_VIDEOEXT = ".avi"         #Video file extension
+CONST_IMGTHRESHOLD = 127        #Difference threshold
+CONST_MATHRESHOLD = 0.2         #Moving average threshold
+CONST_DIFFTHRESHOLD = 4         #Detected movement size threshold
+CONST_ROTATE = True             #Should the output image be rotated 180?
 
 def path_filename(path):
     head, tail = ntpath.split(path)
@@ -35,15 +40,17 @@ def DetectMotion(filename):
     
         t_plus=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
         diff=diffImg(t_minus,t,t_plus)
-        cv2.threshold(diff,127,255,cv2.THRESH_BINARY,diff)            
+        cv2.threshold(diff,CONST_IMGTHRESHOLD,255,cv2.THRESH_BINARY,diff)            
         nz=cv2.countNonZero(diff)
         ma=(ma+nz)/2
         if nz>0:
             pc=(abs(nz-ma)/float(nz))
         else:
             pc=0
-        if (nz>4) and (pc>0.2):
+        if (nz>=CONST_DIFFTHRESHOLD) and (pc>=CONST_MATHRESHOLD):
             #print '{0:06d} {1} {2} {3:.4f}'.format(frame,nz,ma,pc)
+            if CONST_ROTATE:
+                img = cv2.flip(img,flipCode=-1)
             cv2.imwrite('{0}\\image\\{1}-{2:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame), img)
             #cv2.imwrite('{0}\\image\\{1}-{2:06d}-Diff{3:06d}-MA{4:06}.jpg'.format(CONST_ROOTPATH,filenameonly,frame,nz,ma), diff)
         frame+=1
@@ -52,5 +59,5 @@ def DetectMotion(filename):
 
 
 for file in os.listdir(CONST_ROOTPATH):
-    if file.endswith(".avi"):
+    if file.endswith(CONST_VIDEOEXT):
         DetectMotion(file)
