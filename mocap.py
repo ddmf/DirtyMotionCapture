@@ -24,6 +24,7 @@ def DetectMotion(filename):
     t = t_minus
     t_plus = t_minus
     frame=0
+    ma=0
     
     while(cam.isOpened()):
         t_minus=t
@@ -34,10 +35,17 @@ def DetectMotion(filename):
     
         t_plus=cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
         diff=diffImg(t_minus,t,t_plus)
+        cv2.threshold(diff,127,255,cv2.THRESH_BINARY,diff)            
         nz=cv2.countNonZero(diff)
-        if nz>12000:
-            cv2.imwrite('{0}\\images\\{1}-{2:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame), img)
-            #cv2.imwrite('{0}\\images\\{1}-{2:06d}-{3:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame,nz), diff)
+        ma=(ma+nz)/2
+        if nz>0:
+            pc=(abs(nz-ma)/float(nz))
+        else:
+            pc=0
+        if (nz>4) and (pc>0.2):
+            #print '{0:06d} {1} {2} {3:.4f}'.format(frame,nz,ma,pc)
+            cv2.imwrite('{0}\\image\\{1}-{2:06d}.jpg'.format(CONST_ROOTPATH,filenameonly,frame), img)
+            #cv2.imwrite('{0}\\image\\{1}-{2:06d}-Diff{3:06d}-MA{4:06}.jpg'.format(CONST_ROOTPATH,filenameonly,frame,nz,ma), diff)
         frame+=1
             
     cam.release()
